@@ -1,0 +1,70 @@
+---
+title: "Data Analysis Report"
+output: word_document
+params:
+  dataset: NA
+  variable: NA
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+data <- params$dataset
+var <- params$variable
+```
+
+
+
+
+```{r, echo = FALSE}
+for (var in names(data)) {
+  
+  # Section Header for each variable
+  cat("## Analysis for Variable:", var, "\n\n")
+  
+  # Determine if variable is numeric or categorical
+  if (is.numeric(data[[var]])) {
+    # Numeric Variables: Summary statistics
+    summary_stats <- summary(data[[var]])
+    cat("### Summary Statistics\n")
+    knitr::kable(data.frame(Statistic = names(summary_stats), Value = as.numeric(summary_stats)),
+                 caption = paste("Summary Statistics for", var))
+    
+    # Numeric Variables: Histogram
+    cat("### Histogram\n")
+    print(
+      ggplot(data, aes_string(x = var)) +
+        geom_histogram(fill = "lightblue", color = "black", bins = 10) +
+        labs(title = paste("Histogram of", var), x = var, y = "Frequency") +
+        theme_minimal()
+    )
+    
+    # Numeric Variables: Boxplot
+    cat("### Boxplot\n")
+    print(
+      ggplot(data, aes_string(y = var)) +
+        geom_boxplot(fill = "lightblue", color = "black") +
+        labs(title = paste("Boxplot of", var), y = var) +
+        theme_minimal()
+    )
+    
+  } else {
+    # Categorical Variables: Frequency table
+    frequency_table <- as.data.frame(table(data[[var]])) %>%
+      setNames(c("Category", "Frequency"))
+    cat("### Frequency Table\n")
+    knitr::kable(frequency_table, caption = paste("Frequency Table for", var))
+    
+    # Categorical Variables: Bar Chart
+    cat("### Bar Chart\n")
+    print(
+      ggplot(data, aes_string(x = var)) +
+        geom_bar(fill = "lightgreen", color = "black") +
+        labs(title = paste("Bar Chart of", var), x = var, y = "Frequency") +
+        theme_minimal()
+    )
+  }
+  
+  cat("\n---\n\n")  # Separate sections for each variable
+}
+```
